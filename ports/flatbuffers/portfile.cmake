@@ -18,12 +18,19 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     list(APPEND OPTIONS -DFLATBUFFERS_BUILD_FLATC=OFF -DFLATBUFFERS_BUILD_FLATHASH=OFF)
 endif()
 
+if("library" IN_LIST FEATURES)
+    set(BUILD_FLATLIBL ON)
+else()
+    set(BUILD_FLATLIB OFF)
+endif()
+
 vcpkg_configure_cmake(
     SOURCE_PATH ${SOURCE_PATH}
     PREFER_NINJA
     OPTIONS
         -DFLATBUFFERS_BUILD_TESTS=OFF
         -DFLATBUFFERS_BUILD_GRPCTEST=OFF
+        -DFLATBUFFERS_BUILD_FLATLIB=${BUILD_FLATLIB}
         ${OPTIONS}
 )
 
@@ -43,7 +50,13 @@ vcpkg_copy_tool_dependencies(${CURRENT_PACKAGES_DIR}/tools/flatbuffers)
 endif()
 
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/include)
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/bin ${CURRENT_PACKAGES_DIR}/debug/bin)
+
+file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/bin ${CURRENT_PACKAGES_DIR}/debug)
+
+if("library" IN_LIST FEATURES)
+else()
+    file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/bin ${CURRENT_PACKAGES_DIR}/lib)
+endif()
 
 # Handle copyright
 file(COPY ${SOURCE_PATH}/LICENSE.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/flatbuffers)
